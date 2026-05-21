@@ -1,0 +1,7 @@
+rip==0.7.1
+pytest
+pytest-cov
+ruff
+black
+mypy
+httpx
