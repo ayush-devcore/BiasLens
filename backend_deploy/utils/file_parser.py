@@ -1,9 +1,8 @@
-﻿import io
-import json
+﻿import json
 from typing import Optional
 
 import pandas as pd
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
 
 from config import settings
 from utils.validation import (
@@ -16,6 +15,23 @@ from utils.validation import (
 )
 
 SUPPORTED_EXTENSIONS = {".csv", ".json", ".xlsx", ".xls", ".parquet"}
+CHUNK_SIZE = 1024 * 1024  # 1MB
+MAX_FILE_SIZE_BYTES = settings.MAX_FILE_SIZE_MB * 1024 * 1024
+
+
+async def validate_file_size(file: UploadFile):
+    total_size = 0
+
+    while chunk := await file.read(CHUNK_SIZE):
+        total_size += len(chunk)
+
+        if total_size > MAX_FILE_SIZE_BYTES:
+            raise HTTPException(
+                status_code=413,
+                detail=f"File exceeds {settings.MAX_FILE_SIZE_MB}MB limit"
+            )
+
+    await file.seek(0)
 
 
 def _get_extension(filename: str) -> Optional[str]:
@@ -43,41 +59,47 @@ async def parse_uploaded_file(file: UploadFile) -> pd.DataFrame:
             status_code=400,
         )
 
-    content = await file.read()
-    size_mb = len(content) / (1024 * 1024)
-    if size_mb > settings.MAX_FILE_SIZE_MB:
-        raise ValidationError(
-            "FILE_TOO_LARGE",
-            f"File too large: {size_mb:.1f}MB. Maximum allowed: {settings.MAX_FILE_SIZE_MB}MB.",
-            {"file_size_mb": round(size_mb, 2), "maximum_mb": settings.MAX_FILE_SIZE_MB},
-            status_code=413,
-        )
-
+    # validate file size before reading the file content
+    await validate_file_size(file)
+    await file.seek(0)
+    file_obj = file.file
     try:
         if ext == ".csv":
+            file_obj.seek(0)
             try:
-                df = pd.read_csv(io.BytesIO(content), encoding="utf-8", low_memory=False)
+                df = pd.read_csv(file_obj, encoding="latin1", low_memory=False)
             except UnicodeDecodeError:
-                df = pd.read_csv(io.BytesIO(content), encoding="latin1", low_memory=False)
+                file_obj.seek(0)
+                df = pd.read_csv(file_obj, encoding="latin1", low_memory=False)
 
         elif ext == ".json":
+            # read raw bytes/text from the underlying file and decode safely
+            file_obj.seek(0)
+            content = file_obj.read()
+            if isinstance(content, bytes):
+                try:
+                    content = content.decode("utf-8")
+                except UnicodeDecodeError:
+                    content = content.decode("latin1")
+
             payload = json.loads(content)
             validate_json_payload(payload)
             df = pd.DataFrame(payload)
 
-        elif ext in (".xlsx", ".xls"):
-            engine = "openpyxl" if ext == ".xlsx" else "xlrd"
-            df = pd.read_excel(io.BytesIO(content), engine=engine)
-
-        elif ext == ".parquet":
-            df = pd.read_parquet(io.BytesIO(content))
-
         else:
-            raise ValidationError(
-                "UNSUPPORTED_FILE_TYPE",
-                f"Unhandled file extension '{ext}'.",
-                status_code=400,
-            )
+            # handle other supported formats
+            file_obj.seek(0)
+            if ext in (".xlsx", ".xls"):
+                df = pd.read_excel(file_obj)
+            elif ext == ".parquet":
+                df = pd.read_parquet(file_obj)
+            else:
+                raise ValidationError(
+                    "UNSUPPORTED_FILE_TYPE",
+                    f"Unsupported file type. Supported: {', '.join(sorted(SUPPORTED_EXTENSIONS))}.",
+                    {"supported_extensions": sorted(SUPPORTED_EXTENSIONS)},
+                    status_code=400,
+                )
     except ValidationError:
         raise
     except json.JSONDecodeError as e:
