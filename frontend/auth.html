@@ -1,263 +1,822 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
-<meta name="theme-color" content="#020208"/>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:;"/>
-<title>BiasLens — Authenticate</title>
-<link rel="icon" type="image/x-icon" href="pic.ico" />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
-<style>
-:root{--bg:#020208;--c1:#00f5ff;--c2:#7000ff;--c3:#ff0080;--c4:#00ff88;--text:#f0f4ff;--muted:rgba(240,244,255,0.65);--dim:rgba(240,244,255,0.38);--border:rgba(0,245,255,0.14);--border2:rgba(0,245,255,0.3);--card:rgba(8,8,24,0.68);}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh;display:flex;align-items:center;justify-content:center;}
-/* Lightweight CSS-only background instead of THREE.js */
-.bg-grid{position:fixed;inset:0;z-index:0;background:
-  radial-gradient(ellipse 80% 50% at 20% 40%, rgba(112,0,255,0.08) 0%, transparent 60%),
-  radial-gradient(ellipse 60% 40% at 80% 60%, rgba(0,245,255,0.06) 0%, transparent 60%),
-  radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,0,128,0.04) 0%, transparent 70%);}
-.bg-grid::after{content:'';position:absolute;inset:0;background:
-  repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(0,245,255,0.03) 79px, rgba(0,245,255,0.03) 80px),
-  repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(0,245,255,0.03) 79px, rgba(0,245,255,0.03) 80px);animation:gridPulse 8s ease infinite;}
-@keyframes gridPulse{0%,100%{opacity:0.5;}50%{opacity:1;}}
-
-.auth-container{position:relative;z-index:10;width:100%;max-width:440px;padding:20px;}
-.auth-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:40px 36px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 24px 80px rgba(0,0,0,0.5);transform:translateY(20px);opacity:0;animation:fadeUp 0.6s cubic-bezier(0.2,0.8,0.2,1) forwards;}
-@keyframes fadeUp{to{transform:translateY(0);opacity:1;}}
-
-.logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;justify-content:center;text-decoration:none;color:var(--text);}
-.logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--c2),var(--c1));border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-weight:900;font-size:18px;color:#000;}
-.logo-name{font-family:'Orbitron',monospace;font-size:20px;font-weight:700;letter-spacing:2px;background:linear-gradient(90deg,var(--c1),var(--c2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-
-h2{font-family:'Orbitron',monospace;font-size:22px;text-align:center;margin-bottom:8px;letter-spacing:-0.3px;}
-p.sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:24px;font-family:'JetBrains Mono',monospace;line-height:1.5;}
-
-/* Social auth buttons */
-.social-auth{margin-bottom:20px;}
-.social-btns{display:flex;flex-direction:column;gap:10px;}
-.s-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px 20px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.03);cursor:pointer;transition:all 0.2s;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);letter-spacing:0.3px;position:relative;overflow:hidden;}
-.s-btn:hover{background:rgba(255,255,255,0.07);border-color:var(--c1);transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,245,255,0.1);}
-.s-btn:active{transform:translateY(0);}
-.s-btn-ico{font-size:18px;flex-shrink:0;line-height:1;}
-.s-btn .s-label{flex:1;text-align:center;}
-.s-btn.loading{pointer-events:none;opacity:0.6;}
-.s-btn.loading .s-label{opacity:0;}
-.s-btn.loading::after{content:'';position:absolute;width:18px;height:18px;border:2px solid rgba(255,255,255,0.1);border-top-color:var(--c1);border-radius:50%;animation:spin 0.7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-.divider{display:flex;align-items:center;gap:14px;margin:20px 0;color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
-
-.form-group{margin-bottom:16px;}
-label{display:block;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(240,244,255,0.5);margin-bottom:6px;text-transform:uppercase;letter-spacing:1.2px;}
-input{width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:12px;padding:12px 16px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:14px;transition:border-color 0.2s;outline:none;}
-input:focus{border-color:var(--c1);box-shadow:0 0 12px rgba(0,245,255,0.12);}
-input::placeholder{color:var(--dim);}
-
-.btn-primary{width:100%;background:linear-gradient(135deg,var(--c2),var(--c1));color:#000;border:none;padding:13px;border-radius:12px;font-family:'Orbitron',monospace;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px;transition:all 0.2s;letter-spacing:1px;}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(112,0,255,0.4);}
-.btn-primary:active{transform:translateY(0);}
-.btn-primary.loading{pointer-events:none;opacity:0.7;}
-
-.toggle{text-align:center;margin-top:20px;font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
-.toggle span{color:var(--c1);cursor:pointer;font-weight:600;margin-left:4px;transition:color 0.2s;}
-.toggle span:hover{text-decoration:underline;color:#fff;}
-
-.back-link{position:fixed;top:20px;left:20px;z-index:100;display:flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:12px;transition:color 0.2s;}
-.back-link:hover{color:var(--c1);}
-
-/* OAuth popup overlay */
-.oauth-overlay{display:none;position:fixed;inset:0;background:rgba(2,2,8,0.92);backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;padding:20px;}
-.oauth-overlay.on{display:flex;}
-.oauth-modal{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:32px;max-width:400px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,0.6);animation:fadeUp 0.3s ease;}
-.oauth-header{text-align:center;margin-bottom:24px;}
-.oauth-header h3{font-family:'Orbitron',monospace;font-size:16px;margin-bottom:6px;}
-.oauth-header p{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
-.oauth-accounts{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;}
-.oauth-acct{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all 0.2s;background:rgba(255,255,255,0.02);}
-.oauth-acct:hover{background:rgba(0,245,255,0.06);border-color:var(--c1);}
-.oauth-acct.selected{border-color:var(--c1);background:rgba(0,245,255,0.08);box-shadow:0 0 12px rgba(0,245,255,0.1);}
-.acct-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-weight:900;font-size:14px;color:#000;flex-shrink:0;}
-.acct-info{flex:1;min-width:0;}
-.acct-name{font-size:13px;font-weight:600;color:var(--text);}
-.acct-email{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.oauth-add{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border:1px dashed var(--border);border-radius:12px;cursor:pointer;color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:11px;transition:all 0.2s;}
-.oauth-add:hover{border-color:var(--c1);color:var(--c1);}
-.oauth-confirm{width:100%;background:linear-gradient(135deg,var(--c2),var(--c1));color:#000;border:none;padding:12px;border-radius:12px;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:1px;}
-.oauth-confirm:hover{box-shadow:0 8px 24px rgba(0,245,255,0.25);transform:translateY(-1px);}
-.oauth-cancel{display:block;text-align:center;color:var(--dim);font-size:10px;font-family:'JetBrains Mono',monospace;cursor:pointer;margin-top:12px;transition:color 0.2s;}
-.oauth-cancel:hover{color:var(--c3);}
-
-/* Security badge */
-.sec-badge{display:flex;align-items:center;gap:6px;justify-content:center;margin-top:20px;font-size:9px;color:var(--dim);font-family:'JetBrains Mono',monospace;opacity:0.7;}
-.sec-badge svg{width:12px;height:12px;stroke:var(--c4);fill:none;}
-
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(40px);background:rgba(6,6,20,0.96);border:1px solid var(--c1);padding:12px 24px;border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--c1);opacity:0;transition:all 0.3s;z-index:1000;max-width:calc(100vw - 40px);white-space:nowrap;}
-.toast.err{border-color:var(--c3);color:var(--c3);}
-.toast.on{transform:translateX(-50%) translateY(0);opacity:1;}
-
-@keyframes checkDraw{0%{stroke-dashoffset:24;}100%{stroke-dashoffset:0;}}
-.success-icon{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:rgba(0,255,136,0.1);border:2px solid var(--c4);margin:0 auto 14px;animation:fadeUp 0.4s ease;}
-.success-icon svg{stroke:var(--c4);stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
-.success-icon svg path{stroke-dasharray:24;animation:checkDraw 0.5s 0.2s ease forwards;stroke-dashoffset:24;}
-
-@media(max-width:480px){
-  .auth-card{padding:28px 22px;border-radius:18px;}
-  .s-btn{padding:11px 16px;font-size:11px;}
-  .oauth-modal{padding:24px 20px;}
-}
-</style>
-</head>
-<body>
-<!-- CSS-only background (no THREE.js = instant load) -->
-<div class="bg-grid"></div>
-
-<a href="index.html" class="back-link">← back</a>
-
-<div class="auth-container">
-  <div class="auth-card" id="authCard">
-    <a href="index.html" class="logo"><div class="logo-icon">B</div><span class="logo-name">BIASLENS</span></a>
-    <h2 id="title">Welcome Back</h2>
-    <p class="sub" id="subTitle">Sign in to access your audit dashboard</p>
-
-    <!-- Social Auth -->
-    <div class="social-auth" id="socialAuth">
-      <div class="social-btns">
-        <button class="s-btn" id="btnGoogle" onclick="openOAuthPopup('Google')">
-          <span class="s-btn-ico">G</span>
-          <span class="s-label">Continue with Google</span>
-        </button>
-        <button class="s-btn" id="btnTwitter" onclick="openOAuthPopup('Twitter')">
-          <span class="s-btn-ico">𝕏</span>
-          <span class="s-label">Continue with Twitter / X</span>
-        </button>
-        <button class="s-btn" id="btnGithub" onclick="openOAuthPopup('GitHub')">
-          <span class="s-btn-ico">⌂</span>
-          <span class="s-label">Continue with GitHub</span>
-        </button>
-      </div>
-    </div>
-
-    <div class="divider">or use email</div>
-
-    <div id="authForm">
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="email" placeholder="name@company.com" required autocomplete="email"/>
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password"/>
-      </div>
-      <button class="btn-primary" id="btnMain" onclick="handleSubmit()">SIGN_IN()</button>
-    </div>
-
-    <div class="toggle" id="toggleText">
-      Don't have an account? <span onclick="toggleMode()">Sign up</span>
-    </div>
-
-    <div class="sec-badge">
-      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      AES-256 encrypted · bcrypt hashed · JWT secured
-    </div>
-  </div>
-</div>
-
-<!-- OAuth Account Selection Popup -->
-<div class="oauth-overlay" id="oauthOverlay">
-  <div class="oauth-modal">
-    <div class="oauth-header">
-      <h3 id="oauthTitle">Choose an Account</h3>
-      <p id="oauthSub">Select which account to sign in with</p>
-    </div>
-    <div class="oauth-accounts" id="oauthAccounts"></div>
-    <div class="oauth-add" onclick="useCustomAccount()">+ Use another account</div>
-    <button class="oauth-confirm" id="oauthConfirm" onclick="confirmOAuth()" style="margin-top:16px;">CONTINUE →</button>
-    <span class="oauth-cancel" onclick="closeOAuthPopup()">Cancel</span>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<!-- NO THREE.js loaded = faster page load -->
-<script type="module">
-  import { 
-    auth, db, googleProvider, twitterProvider, githubProvider,
-    signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-    doc, setDoc, onAuthStateChanged
-  } from './firebase-config.js';
-
-  let mode = 'login';
-  
-  // Make functions available globally since we are using inline onclick attributes
-  window.toggleMode = function() {
-    mode = mode === 'login' ? 'signup' : 'login';
-    document.getElementById('title').textContent = mode === 'login' ? 'Welcome Back' : 'Create Account';
-    document.getElementById('subTitle').textContent = mode === 'login'
-      ? 'Sign in to access your audit dashboard'
-      : 'Join BiasLens to save and export audits';
-    document.getElementById('btnMain').textContent = mode === 'login' ? 'SIGN_IN()' : 'CREATE_ACCOUNT()';
-    document.getElementById('toggleText').innerHTML = mode === 'login'
-      ? "Don't have an account? <span onclick='toggleMode()'>Sign up</span>"
-      : "Already have an account? <span onclick='toggleMode()'>Sign in</span>";
-  };
-
-  window.showToast = function(msg, err=false) {
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.className = 'toast on' + (err ? ' err' : '');
-    clearTimeout(t._to);
-    t._to = setTimeout(() => t.classList.remove('on'), 4000);
-  };
-
-  window.openOAuthPopup = async function(providerName) {
-    const btn = document.getElementById('btn' + providerName.replace('GitHub','Github'));
-    if (btn) btn.classList.add('loading');
-    
-    window.showToast(`Authenticating with ${providerName}...`);
-
-    let provider;
-    if (providerName === 'Google') provider = googleProvider;
-    else if (providerName === 'Twitter') provider = twitterProvider;
-    else if (providerName === 'GitHub') provider = githubProvider;
-
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      
-      // Create or update user profile in Firestore
-      try {
-        await setDoc(doc(db, 'users', user.uid), {
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-          lastLogin: new Date()
-        }, { merge: true });
-      } catch (dbErr) {
-        console.warn('Failed to write to Firestore (ensure rules allow write)', dbErr);
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1.0,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#020208" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:;"
+    />
+    <title>BiasLens — Authenticate</title>
+    <link rel="icon" type="image/x-icon" href="pic.ico" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #020208;
+        --c1: #00f5ff;
+        --c2: #7000ff;
+        --c3: #ff0080;
+        --c4: #00ff88;
+        --text: #f0f4ff;
+        --muted: rgba(240, 244, 255, 0.65);
+        --dim: rgba(240, 244, 255, 0.38);
+        --border: rgba(0, 245, 255, 0.14);
+        --border2: rgba(0, 245, 255, 0.3);
+        --card: rgba(8, 8, 24, 0.68);
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Space Grotesk", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        overflow-x: hidden;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* Lightweight CSS-only background instead of THREE.js */
+      .bg-grid {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background:
+          radial-gradient(
+            ellipse 80% 50% at 20% 40%,
+            rgba(112, 0, 255, 0.08) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 60% 40% at 80% 60%,
+            rgba(0, 245, 255, 0.06) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 50% 50% at 50% 50%,
+            rgba(255, 0, 128, 0.04) 0%,
+            transparent 70%
+          );
+      }
+      .bg-grid::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 79px,
+            rgba(0, 245, 255, 0.03) 79px,
+            rgba(0, 245, 255, 0.03) 80px
+          ),
+          repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 79px,
+            rgba(0, 245, 255, 0.03) 79px,
+            rgba(0, 245, 255, 0.03) 80px
+          );
+        animation: gridPulse 8s ease infinite;
+      }
+      @keyframes gridPulse {
+        0%,
+        100% {
+          opacity: 0.5;
+        }
+        50% {
+          opacity: 1;
+        }
       }
 
-      showSuccess(providerName, user.email || 'Connected');
-    } catch (e) {
-      console.error(e);
-      window.showToast(e.message, true);
-    } finally {
-      if (btn) btn.classList.remove('loading');
-    }
-  };
+      .auth-container {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 440px;
+        padding: 20px;
+      }
+      .auth-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 40px 36px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+        transform: translateY(20px);
+        opacity: 0;
+        animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      }
+      @keyframes fadeUp {
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
 
-  // Close placeholder popup if invoked from elsewhere
-  window.closeOAuthPopup = function() {
-    document.getElementById('oauthOverlay').classList.remove('on');
-  };
-  window.useCustomAccount = function() {
-    window.closeOAuthPopup();
-    document.getElementById('email').focus();
-  };
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 28px;
+        justify-content: center;
+        text-decoration: none;
+        color: var(--text);
+      }
+      .logo-icon {
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, var(--c2), var(--c1));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Orbitron", monospace;
+        font-weight: 900;
+        font-size: 18px;
+        color: #000;
+      }
+      .logo-name {
+        font-family: "Orbitron", monospace;
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        background: linear-gradient(90deg, var(--c1), var(--c2));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
 
-  function showSuccess(provider, email) {
-    const card = document.getElementById('authCard');
-    card.innerHTML = `
+      h2 {
+        font-family: "Orbitron", monospace;
+        font-size: 22px;
+        text-align: center;
+        margin-bottom: 8px;
+        letter-spacing: -0.3px;
+      }
+      p.sub {
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 24px;
+        font-family: "JetBrains Mono", monospace;
+        line-height: 1.5;
+      }
+
+      /* Social auth buttons */
+      .social-auth {
+        margin-bottom: 20px;
+      }
+      .social-btns {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .s-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        width: 100%;
+        padding: 13px 20px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.03);
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        color: var(--text);
+        letter-spacing: 0.3px;
+        position: relative;
+        overflow: hidden;
+      }
+      .s-btn:hover {
+        background: rgba(255, 255, 255, 0.07);
+        border-color: var(--c1);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(0, 245, 255, 0.1);
+      }
+      .s-btn:active {
+        transform: translateY(0);
+      }
+      .s-btn-ico {
+        font-size: 18px;
+        flex-shrink: 0;
+        line-height: 1;
+      }
+      .s-btn .s-label {
+        flex: 1;
+        text-align: center;
+      }
+      .s-btn.loading {
+        pointer-events: none;
+        opacity: 0.6;
+      }
+      .s-btn.loading .s-label {
+        opacity: 0;
+      }
+      .s-btn.loading::after {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-top-color: var(--c1);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .divider {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin: 20px 0;
+        color: var(--dim);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+      }
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+
+      .form-group {
+        margin-bottom: 16px;
+      }
+      label {
+        display: block;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: rgba(240, 244, 255, 0.5);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+      }
+      input {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px 16px;
+        color: var(--text);
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 14px;
+        transition: border-color 0.2s;
+        outline: none;
+      }
+      input:focus {
+        border-color: var(--c1);
+        box-shadow: 0 0 12px rgba(0, 245, 255, 0.12);
+      }
+      input::placeholder {
+        color: var(--dim);
+      }
+
+      .btn-primary {
+        width: 100%;
+        background: linear-gradient(135deg, var(--c2), var(--c1));
+        color: #000;
+        border: none;
+        padding: 13px;
+        border-radius: 12px;
+        font-family: "Orbitron", monospace;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 6px;
+        transition: all 0.2s;
+        letter-spacing: 1px;
+      }
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 28px rgba(112, 0, 255, 0.4);
+      }
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+      .btn-primary.loading {
+        pointer-events: none;
+        opacity: 0.7;
+      }
+
+      .toggle {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 12px;
+        color: var(--muted);
+        font-family: "JetBrains Mono", monospace;
+      }
+      .toggle span {
+        color: var(--c1);
+        cursor: pointer;
+        font-weight: 600;
+        margin-left: 4px;
+        transition: color 0.2s;
+      }
+      .toggle span:hover {
+        text-decoration: underline;
+        color: #fff;
+      }
+
+      .back-link {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--muted);
+        text-decoration: none;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        transition: color 0.2s;
+      }
+      .back-link:hover {
+        color: var(--c1);
+      }
+
+      /* OAuth popup overlay */
+      .oauth-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 2, 8, 0.92);
+        backdrop-filter: blur(6px);
+        z-index: 500;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .oauth-overlay.on {
+        display: flex;
+      }
+      .oauth-modal {
+        background: var(--card);
+        border: 1px solid var(--border2);
+        border-radius: 20px;
+        padding: 32px;
+        max-width: 400px;
+        width: 100%;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+        animation: fadeUp 0.3s ease;
+      }
+      .oauth-header {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+      .oauth-header h3 {
+        font-family: "Orbitron", monospace;
+        font-size: 16px;
+        margin-bottom: 6px;
+      }
+      .oauth-header p {
+        font-size: 11px;
+        color: var(--muted);
+        font-family: "JetBrains Mono", monospace;
+      }
+      .oauth-accounts {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .oauth-acct {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .oauth-acct:hover {
+        background: rgba(0, 245, 255, 0.06);
+        border-color: var(--c1);
+      }
+      .oauth-acct.selected {
+        border-color: var(--c1);
+        background: rgba(0, 245, 255, 0.08);
+        box-shadow: 0 0 12px rgba(0, 245, 255, 0.1);
+      }
+      .acct-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--c2), var(--c1));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Orbitron", monospace;
+        font-weight: 900;
+        font-size: 14px;
+        color: #000;
+        flex-shrink: 0;
+      }
+      .acct-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .acct-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .acct-email {
+        font-size: 10px;
+        color: var(--muted);
+        font-family: "JetBrains Mono", monospace;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .oauth-add {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px;
+        border: 1px dashed var(--border);
+        border-radius: 12px;
+        cursor: pointer;
+        color: var(--dim);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        transition: all 0.2s;
+      }
+      .oauth-add:hover {
+        border-color: var(--c1);
+        color: var(--c1);
+      }
+      .oauth-confirm {
+        width: 100%;
+        background: linear-gradient(135deg, var(--c2), var(--c1));
+        color: #000;
+        border: none;
+        padding: 12px;
+        border-radius: 12px;
+        font-family: "Orbitron", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        letter-spacing: 1px;
+      }
+      .oauth-confirm:hover {
+        box-shadow: 0 8px 24px rgba(0, 245, 255, 0.25);
+        transform: translateY(-1px);
+      }
+      .oauth-cancel {
+        display: block;
+        text-align: center;
+        color: var(--dim);
+        font-size: 10px;
+        font-family: "JetBrains Mono", monospace;
+        cursor: pointer;
+        margin-top: 12px;
+        transition: color 0.2s;
+      }
+      .oauth-cancel:hover {
+        color: var(--c3);
+      }
+
+      /* Security badge */
+      .sec-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        justify-content: center;
+        margin-top: 20px;
+        font-size: 9px;
+        color: var(--dim);
+        font-family: "JetBrains Mono", monospace;
+        opacity: 0.7;
+      }
+      .sec-badge svg {
+        width: 12px;
+        height: 12px;
+        stroke: var(--c4);
+        fill: none;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(40px);
+        background: rgba(6, 6, 20, 0.96);
+        border: 1px solid var(--c1);
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        color: var(--c1);
+        opacity: 0;
+        transition: all 0.3s;
+        z-index: 1000;
+        max-width: calc(100vw - 40px);
+        white-space: nowrap;
+      }
+      .toast.err {
+        border-color: var(--c3);
+        color: var(--c3);
+      }
+      .toast.on {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+
+      @keyframes checkDraw {
+        0% {
+          stroke-dashoffset: 24;
+        }
+        100% {
+          stroke-dashoffset: 0;
+        }
+      }
+      .success-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: rgba(0, 255, 136, 0.1);
+        border: 2px solid var(--c4);
+        margin: 0 auto 14px;
+        animation: fadeUp 0.4s ease;
+      }
+      .success-icon svg {
+        stroke: var(--c4);
+        stroke-width: 2.5;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .success-icon svg path {
+        stroke-dasharray: 24;
+        animation: checkDraw 0.5s 0.2s ease forwards;
+        stroke-dashoffset: 24;
+      }
+
+      @media (max-width: 480px) {
+        .auth-card {
+          padding: 28px 22px;
+          border-radius: 18px;
+        }
+        .s-btn {
+          padding: 11px 16px;
+          font-size: 11px;
+        }
+        .oauth-modal {
+          padding: 24px 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- CSS-only background (no THREE.js = instant load) -->
+    <div class="bg-grid"></div>
+
+    <a href="index.html" class="back-link">← back</a>
+
+    <div class="auth-container">
+      <div class="auth-card" id="authCard">
+        <a href="index.html" class="logo"
+          ><div class="logo-icon">B</div>
+          <span class="logo-name">BIASLENS</span></a
+        >
+        <h2 id="title">Welcome Back</h2>
+        <p class="sub" id="subTitle">Sign in to access your audit dashboard</p>
+
+        <!-- Social Auth -->
+        <div class="social-auth" id="socialAuth">
+          <div class="social-btns">
+            <button
+              class="s-btn"
+              id="btnGoogle"
+              onclick="openOAuthPopup('Google')"
+            >
+              <span class="s-btn-ico">G</span>
+              <span class="s-label">Continue with Google</span>
+            </button>
+            <button
+              class="s-btn"
+              id="btnTwitter"
+              onclick="openOAuthPopup('Twitter')"
+            >
+              <span class="s-btn-ico">𝕏</span>
+              <span class="s-label">Continue with Twitter / X</span>
+            </button>
+            <button
+              class="s-btn"
+              id="btnGithub"
+              onclick="openOAuthPopup('GitHub')"
+            >
+              <span class="s-btn-ico">⌂</span>
+              <span class="s-label">Continue with GitHub</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="divider">or use email</div>
+
+        <div id="authForm">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input
+              type="email"
+              id="email"
+              placeholder="name@company.com"
+              required
+              autocomplete="email"
+            />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              id="password"
+              placeholder="••••••••"
+              required
+              autocomplete="current-password"
+            />
+          </div>
+          <button class="btn-primary" id="btnMain" onclick="handleSubmit()">
+            SIGN_IN()
+          </button>
+        </div>
+
+        <div class="toggle" id="toggleText">
+          Don't have an account? <span onclick="toggleMode()">Sign up</span>
+        </div>
+
+        <div class="sec-badge">
+          <svg viewBox="0 0 24 24" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          AES-256 encrypted · bcrypt hashed · JWT secured
+        </div>
+      </div>
+    </div>
+
+    <!-- OAuth Account Selection Popup -->
+    <div class="oauth-overlay" id="oauthOverlay">
+      <div class="oauth-modal">
+        <div class="oauth-header">
+          <h3 id="oauthTitle">Choose an Account</h3>
+          <p id="oauthSub">Select which account to sign in with</p>
+        </div>
+        <div class="oauth-accounts" id="oauthAccounts"></div>
+        <div class="oauth-add" onclick="useCustomAccount()">
+          + Use another account
+        </div>
+        <button
+          class="oauth-confirm"
+          id="oauthConfirm"
+          onclick="confirmOAuth()"
+          style="margin-top: 16px"
+        >
+          CONTINUE →
+        </button>
+        <span class="oauth-cancel" onclick="closeOAuthPopup()">Cancel</span>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- NO THREE.js loaded = faster page load -->
+    <script type="module">
+      import {
+        auth,
+        db,
+        googleProvider,
+        twitterProvider,
+        githubProvider,
+        signInWithPopup,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        sendEmailVerification,
+        signOut,
+        doc,
+        setDoc,
+        onAuthStateChanged,
+      } from "./firebase-config.js";
+
+      let mode = "login";
+      let signupPendingVerification = false;
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      function isValidEmailFormat(email) {
+        return emailPattern.test(email) && email.length <= 254;
+      }
+
+      // Make functions available globally since we are using inline onclick attributes
+      window.toggleMode = function () {
+        mode = mode === "login" ? "signup" : "login";
+        document.getElementById("title").textContent =
+          mode === "login" ? "Welcome Back" : "Create Account";
+        document.getElementById("subTitle").textContent =
+          mode === "login"
+            ? "Sign in to access your audit dashboard"
+            : "Join BiasLens to save and export audits";
+        document.getElementById("btnMain").textContent =
+          mode === "login" ? "SIGN_IN()" : "CREATE_ACCOUNT()";
+        document.getElementById("toggleText").innerHTML =
+          mode === "login"
+            ? "Don't have an account? <span onclick='toggleMode()'>Sign up</span>"
+            : "Already have an account? <span onclick='toggleMode()'>Sign in</span>";
+      };
+
+      window.showToast = function (msg, err = false) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.className = "toast on" + (err ? " err" : "");
+        clearTimeout(t._to);
+        t._to = setTimeout(() => t.classList.remove("on"), 4000);
+      };
+
+      window.openOAuthPopup = async function (providerName) {
+        const btn = document.getElementById(
+          "btn" + providerName.replace("GitHub", "Github"),
+        );
+        if (btn) btn.classList.add("loading");
+
+        window.showToast(`Authenticating with ${providerName}...`);
+
+        let provider;
+        if (providerName === "Google") provider = googleProvider;
+        else if (providerName === "Twitter") provider = twitterProvider;
+        else if (providerName === "GitHub") provider = githubProvider;
+
+        try {
+          const result = await signInWithPopup(auth, provider);
+          const user = result.user;
+
+          // Create or update user profile in Firestore
+          try {
+            await setDoc(
+              doc(db, "users", user.uid),
+              {
+                email: user.email,
+                displayName: user.displayName,
+                photoURL: user.photoURL,
+                lastLogin: new Date(),
+              },
+              { merge: true },
+            );
+          } catch (dbErr) {
+            console.warn(
+              "Failed to write to Firestore (ensure rules allow write)",
+              dbErr,
+            );
+          }
+
+          showSuccess(providerName, user.email || "Connected");
+        } catch (e) {
+          console.error(e);
+          window.showToast(e.message, true);
+        } finally {
+          if (btn) btn.classList.remove("loading");
+        }
+      };
+
+      // Close placeholder popup if invoked from elsewhere
+      window.closeOAuthPopup = function () {
+        document.getElementById("oauthOverlay").classList.remove("on");
+      };
+      window.useCustomAccount = function () {
+        window.closeOAuthPopup();
+        document.getElementById("email").focus();
+      };
+
+      function showSuccess(provider, email) {
+        const card = document.getElementById("authCard");
+        card.innerHTML = `
       <a href="index.html" class="logo"><div class="logo-icon">B</div><span class="logo-name">BIASLENS</span></a>
       <div style="text-align:center;padding:16px 0;">
         <div class="success-icon">
@@ -271,60 +830,105 @@ input::placeholder{color:var(--dim);}
         </button>
       </div>
     `;
-    window.showToast(`✓ Authenticated securely`);
-    setTimeout(() => window.location.href = 'dashboard.html', 1500);
-  }
-
-  window.handleSubmit = async function() {
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    if (!email || !password) { window.showToast('Please fill all fields', true); return; }
-    if (password.length < 6) { window.showToast('Password must be 6+ characters', true); return; }
-    
-    const btn = document.getElementById('btnMain');
-    btn.classList.add('loading');
-    btn.textContent = 'AUTHENTICATING...';
-
-    try {
-      if (mode === 'signup') {
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        const user = cred.user;
-        
-        await setDoc(doc(db, 'users', user.uid), {
-          email: user.email,
-          createdAt: new Date(),
-          role: 'user'
-        });
-
-        window.showToast('✓ Account created! Redirecting...');
-        setTimeout(() => window.location.href = 'dashboard.html', 1000);
-      } else {
-        await signInWithEmailAndPassword(auth, email, password);
-        window.showToast('✓ Login successful!');
-        setTimeout(() => window.location.href = 'dashboard.html', 800);
+        window.showToast(`✓ Authenticated securely`);
+        setTimeout(() => (window.location.href = "dashboard.html"), 1500);
       }
-    } catch(e) {
-      console.error(e);
-      window.showToast(e.message, true);
-    } finally {
-      btn.classList.remove('loading');
-      btn.textContent = mode === 'login' ? 'SIGN_IN()' : 'CREATE_ACCOUNT()';
-    }
-  };
 
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && (document.activeElement.id === 'email' || document.activeElement.id === 'password')) {
-      window.handleSubmit();
-    }
-  });
+      window.handleSubmit = async function () {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        if (!email || !password) {
+          window.showToast("Please fill all fields", true);
+          return;
+        }
+        if (!isValidEmailFormat(email)) {
+          window.showToast("Enter a valid email address", true);
+          return;
+        }
+        if (password.length < 6) {
+          window.showToast("Password must be 6+ characters", true);
+          return;
+        }
 
-  onAuthStateChanged(auth, user => {
-    // We set a flag to avoid flashing content if they load the page logged in
-    if (user && document.visibilityState === 'visible') {
-      window.showToast('Already authenticated. Redirecting...');
-      setTimeout(() => window.location.href = 'dashboard.html', 800);
-    }
-  });
-</script>
-</body>
+        const btn = document.getElementById("btnMain");
+        btn.classList.add("loading");
+        btn.textContent = "AUTHENTICATING...";
+
+        try {
+          if (mode === "signup") {
+            signupPendingVerification = true;
+            const cred = await createUserWithEmailAndPassword(
+              auth,
+              email,
+              password,
+            );
+            const user = cred.user;
+
+            await setDoc(doc(db, "users", user.uid), {
+              email: user.email,
+              createdAt: new Date(),
+              role: "user",
+            });
+
+            await sendEmailVerification(user);
+            await signOut(auth);
+            window.showToast(
+              "Verification email sent. Check your inbox before signing in.",
+            );
+          } else {
+            const cred = await signInWithEmailAndPassword(
+              auth,
+              email,
+              password,
+            );
+            if (!cred.user.emailVerified) {
+              await signOut(auth);
+              window.showToast(
+                "Please verify your email before signing in.",
+                true,
+              );
+              return;
+            }
+            window.showToast("✓ Login successful!");
+            setTimeout(() => (window.location.href = "dashboard.html"), 800);
+          }
+        } catch (e) {
+          console.error(e);
+          window.showToast(e.message, true);
+        } finally {
+          signupPendingVerification = false;
+          btn.classList.remove("loading");
+          btn.textContent = mode === "login" ? "SIGN_IN()" : "CREATE_ACCOUNT()";
+        }
+      };
+
+      document.addEventListener("keydown", (e) => {
+        if (
+          e.key === "Enter" &&
+          (document.activeElement.id === "email" ||
+            document.activeElement.id === "password")
+        ) {
+          window.handleSubmit();
+        }
+      });
+
+      onAuthStateChanged(auth, (user) => {
+        // We set a flag to avoid flashing content if they load the page logged in
+        if (user && !user.emailVerified) {
+          if (!signupPendingVerification) {
+            window.showToast(
+              "Please verify your email before signing in.",
+              true,
+            );
+          }
+          return;
+        }
+
+        if (user && document.visibilityState === "visible") {
+          window.showToast("Already authenticated. Redirecting...");
+          setTimeout(() => (window.location.href = "dashboard.html"), 800);
+        }
+      });
+    </script>
+  </body>
 </html>
