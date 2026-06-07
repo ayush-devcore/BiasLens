@@ -5,8 +5,8 @@
 
 #back-to-top-container {
   position: fixed;
-  bottom: clamp(16px, 3vh, 32px);
-  right: clamp(16px, 3vw, 32px);
+  bottom: clamp(17px, 3vh, 32px);
+  right: clamp(18px, 3vw, 32px);
   z-index: 100;
   pointer-events: none;
 }
