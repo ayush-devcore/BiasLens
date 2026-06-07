@@ -1651,69 +1651,69 @@
     </footer>
     <div class="toast" id="toast"></div>
     <div id="fileErrorModal" style="
-display:none;
-position:fixed;
-inset:0;
-background:rgba(2,2,8,0.65);
-backdrop-filter:blur(8px);
-z-index:9999;
-justify-content:center;
-align-items:center;
-">
-
-  <div style="
-    width:min(450px,90vw);
-    background:rgba(8,8,24,0.95);
-    border:1px solid rgba(255,0,128,0.25);
-    border-radius:18px;
-    padding:28px;
-    text-align:center;
-    box-shadow:0 0 40px rgba(255,0,128,0.15);
-  ">
-
-    <div style="
-      width:12px;
-      height:12px;
-      border-radius:50%;
-      background:#ff0080;
-      margin:0 auto 18px;
-      box-shadow:0 0 15px rgba(255,0,128,0.8);
-    "></div>
-
-    <h3 style="
-      color:#ff0080;
-      font-family:'Orbitron', monospace;
-      margin-bottom:14px;
-      letter-spacing:1px;
-    ">
-      Unsupported File Type
-    </h3>
-
-    <p id="fileErrorText" style="
-      color:rgba(240,244,255,0.85);
-      line-height:1.7;
-      margin-bottom:22px;
-      font-family:'JetBrains Mono', monospace;
-    "></p>
-
-    <button
-      onclick="closeFileErrorModal()"
-      style="
-        border:none;
-        border-radius:10px;
-        padding:10px 22px;
-        cursor:pointer;
-        font-family:'JetBrains Mono', monospace;
-        font-weight:600;
-        background:linear-gradient(135deg,#7000ff,#ff0080);
-        color:white;
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(2,2,8,0.65);
+      backdrop-filter:blur(8px);
+      z-index:9999;
+      justify-content:center;
+      align-items:center;
       ">
-      Got it
-    </button>
 
-  </div>
+        <div style="
+          width:min(450px,90vw);
+          background:rgba(8,8,24,0.95);
+          border:1px solid rgba(255,0,128,0.25);
+          border-radius:18px;
+          padding:28px;
+          text-align:center;
+          box-shadow:0 0 40px rgba(255,0,128,0.15);
+        ">
 
-</div>
+          <div style="
+            width:12px;
+            height:12px;
+            border-radius:50%;
+            background:#ff0080;
+            margin:0 auto 18px;
+            box-shadow:0 0 15px rgba(255,0,128,0.8);
+          "></div>
+
+          <h3 style="
+            color:#ff0080;
+            font-family:'Orbitron', monospace;
+            margin-bottom:14px;
+            letter-spacing:1px;
+          ">
+            Unsupported File Type
+          </h3>
+
+          <p id="fileErrorText" style="
+            color:rgba(240,244,255,0.85);
+            line-height:1.7;
+            margin-bottom:22px;
+            font-family:'JetBrains Mono', monospace;
+          "></p>
+
+          <button
+            onclick="closeFileErrorModal()"
+            style="
+              border:none;
+              border-radius:10px;
+              padding:10px 22px;
+              cursor:pointer;
+              font-family:'JetBrains Mono', monospace;
+              font-weight:600;
+              background:linear-gradient(135deg,#7000ff,#ff0080);
+              color:white;
+            ">
+            Got it
+          </button>
+
+        </div>
+
+      </div>
     <script type="module">
       import { auth, onAuthStateChanged, signOut } from "./firebase-config.js";
 
@@ -1809,7 +1809,10 @@ align-items:center;
 
         if (!validateFileType(file)) 
         {
-          showFileErrorModal(`${file.name} is not a supported file format.\n\nPlease use a CSV, JSON, XLSX, XLS or Parquet file.`);        }
+          showFileErrorModal(`${file.name} is not a supported file format.\n\nPlease use a CSV, JSON, XLSX, XLS or Parquet file.`);        
+          inp.value = "";
+          return;
+        }
 
         prepareAudit(file);
       };
@@ -1824,7 +1827,9 @@ align-items:center;
 
         if (!validateFileType(file)) 
         {
-          showFileErrorModal(`${file.name} is not a supported file format.\n\nPlease use a CSV, JSON, XLSX, XLS or Parquet file.`);        }
+          showFileErrorModal(`${file.name} is not a supported file format.\n\nPlease use a CSV, JSON, XLSX, XLS or Parquet file.`);        
+          return;
+        }
 
         prepareAudit(file);
       };
