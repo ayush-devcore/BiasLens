@@ -1180,6 +1180,17 @@
           transition-duration: 0.01ms !important;
         }
       }
+      .lucide-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        vertical-align: middle;
+      }
+      .lucide-icon svg {
+        width: 20px;
+        height: 20px;
+        stroke-width: 1.5;
+      }
     </style>
     <link rel="stylesheet" href="back-to-top.css" />
   </head>
@@ -1216,27 +1227,27 @@
       >
       <nav class="sb-nav">
         <button class="ni on" onclick="switchTab('overview', this)">
-          <span class="ni-ic">📊</span>overview
+          <span class="ni-ic"><i data-lucide="layout-dashboard"></i></span>overview
         </button>
         <button class="ni" onclick="switchTab('disparities', this)">
-          <span class="ni-ic">📉</span>disparities
+          <span class="ni-ic"><i data-lucide="trending-down"></i></span>disparities
         </button>
         <button class="ni" onclick="switchTab('issues', this)">
-          <span class="ni-ic">🚨</span>issues
+          <span class="ni-ic"><i data-lucide="alert-circle"></i></span>issues
         </button>
         <button class="ni" onclick="switchTab('suggestions', this)">
-          <span class="ni-ic">🛠️</span>suggestions
+          <span class="ni-ic"><i data-lucide="wrench"></i></span>suggestions
         </button>
         <button class="ni" onclick="switchTab('proxies', this)">
-          <span class="ni-ic">🔗</span>proxy vars
+          <span class="ni-ic"><i data-lucide="link"></i></span>proxy vars
         </button>
         <button class="ni" onclick="switchTab('dataset', this)">
-          <span class="ni-ic">📋</span>dataset info
+          <span class="ni-ic"><i data-lucide="clipboard-list"></i></span>dataset info
         </button>
       </nav>
       <div class="sb-foot">
         <div class="file-tag">
-          <div class="ft-name" id="sideFile">📄 no file loaded</div>
+          <div class="ft-name" id="sideFile">no file loaded</div>
           <div class="ft-meta" id="sideMeta">Upload a dataset to begin</div>
         </div>
       </div>
@@ -1286,7 +1297,7 @@
         <!-- NO DATA STATE -->
         <div id="noData" style="display: none">
           <div class="no-data">
-            <div style="font-size: 48px; margin-bottom: 18px">📭</div>
+            <div style="margin-bottom: 18px"><i data-lucide="inbox" style="width:48px;height:48px;stroke:var(--muted);"></i></div>
             <div
               style="font-size: 16px; margin-bottom: 10px; color: var(--text)"
             >
@@ -1540,6 +1551,7 @@
     <div class="toast" id="toast"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script>
       window.addEventListener(
         "scroll",
@@ -1633,7 +1645,7 @@
 
         // Header
         const fname = d.filename || "dataset";
-        document.getElementById("sideFile").textContent = "📄 " + fname;
+        document.getElementById("sideFile").textContent = fname;
         document.getElementById("sideMeta").textContent =
           `${(ds.total_records || 0).toLocaleString()} records\nAudit: ${(d.audit_id || "").slice(0, 14)}`;
         document.getElementById("topFile").textContent = fname;
@@ -1932,7 +1944,7 @@
         const il = document.getElementById("issueList");
         if (issues.length === 0) {
           il.innerHTML =
-            '<div class="no-data" style="padding:40px;">✅ No bias issues detected in this dataset.</div>';
+            '<div class="no-data" style="padding:40px;">No bias issues detected in this dataset.</div>';
           return;
         }
         il.innerHTML = issues
@@ -2076,7 +2088,7 @@
         const pg = document.getElementById("pvGrid");
         if (!pvs.length) {
           pg.innerHTML =
-            "<div style=\"color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px;padding:20px 0;\">✅ No proxy variables detected.</div>";
+            "<div style=\"color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px;padding:20px 0;\">No proxy variables detected.</div>";
         } else {
           pg.innerHTML = pvs
             .map((pv) => {
@@ -2196,7 +2208,7 @@
       function gatekeeper(type) {
         if (!window.USER) {
           showToast(
-            "⚠️ LOGIN_REQUIRED: Download access is restricted to members.",
+            "LOGIN_REQUIRED: Download access is restricted to members.",
             true,
           );
           setTimeout(() => (location.href = "auth.html"), 1500);
@@ -2315,5 +2327,6 @@
     </script>
     <script type="module" src="floating-bg.js"></script>
     <script src="back-to-top.js"></script>
+    <script>lucide.createIcons();</script>
   </body>
 </html>

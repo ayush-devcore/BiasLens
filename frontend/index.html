@@ -1393,8 +1393,20 @@
           transition-duration: 0.01ms !important;
         }
       }
+      .lucide-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        vertical-align: middle;
+      }
+      .lucide-icon svg {
+        width: 20px;
+        height: 20px;
+        stroke-width: 1.5;
+      }
     </style>
     <link rel="stylesheet" href="back-to-top.css" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   </head>
 
   <body>
@@ -1508,7 +1520,7 @@
         onclick="triggerUpload()"
       >
         <div class="di">
-          <div class="di-inner">📂</div>
+          <div class="di-inner"><i data-lucide="folder-open" style="width:26px;height:26px;stroke:var(--c1);"></i></div>
         </div>
         <h3>DROP DATASET HERE</h3>
         <p>
@@ -1549,19 +1561,19 @@
         <div class="up-sub" id="upSub">Sending to BiasLens API</div>
         <div class="step-list">
           <div class="step-item" id="st1">
-            <span class="step-ic">📤</span>Parsing file & detecting columns
+            <span class="step-ic"><i data-lucide="upload"></i></span>Parsing file & detecting columns
           </div>
           <div class="step-item" id="st2">
-            <span class="step-ic">🔍</span>Running 9 fairness metrics
+            <span class="step-ic"><i data-lucide="search"></i></span>Running 9 fairness metrics
           </div>
           <div class="step-item" id="st3">
-            <span class="step-ic">🔗</span>Detecting proxy variables
+            <span class="step-ic"><i data-lucide="link"></i></span>Detecting proxy variables
           </div>
           <div class="step-item" id="st4">
-            <span class="step-ic">🤖</span>NVIDIA NIM AI explanation
+            <span class="step-ic"><i data-lucide="bot"></i></span>NVIDIA NIM AI explanation
           </div>
           <div class="step-item" id="st5">
-            <span class="step-ic">✅</span>Building audit report
+            <span class="step-ic"><i data-lucide="check-circle"></i></span>Building audit report
           </div>
         </div>
       </div>
@@ -1859,42 +1871,42 @@
       const feats = [
         {
           n: "01",
-          ico: "🔍",
+          ico: `<i data-lucide="search"></i>`,
           bg: "rgba(0,245,255,0.07)",
           t: "Statistical Parity",
           d: "Detects when demographic groups receive different outcome rates regardless of qualifications.",
         },
         {
           n: "02",
-          ico: "⚖️",
+          ico: `<i data-lucide="scale"></i>`,
           bg: "rgba(255,0,128,0.07)",
           t: "Disparate Impact",
           d: "Flags violations of the legal 80% rule — computed directly from your uploaded data.",
         },
         {
           n: "03",
-          ico: "🎯",
+          ico: `<i data-lucide="target"></i>`,
           bg: "rgba(251,191,36,0.07)",
           t: "Equal Opportunity",
           d: "Ensures true positive rates are equal across groups — all values from your real dataset.",
         },
         {
           n: "04",
-          ico: "🔗",
+          ico: `<i data-lucide="link"></i>`,
           bg: "rgba(0,255,136,0.07)",
           t: "Proxy Detection",
           d: "Finds features correlated with protected attributes using Pearson correlation on your columns.",
         },
         {
           n: "05",
-          ico: "📊",
+          ico: `<i data-lucide="bar-chart-2"></i>`,
           bg: "rgba(112,0,255,0.07)",
           t: "Calibration Bias",
           d: "Checks outcome probability calibration across demographic groups from actual data distribution.",
         },
         {
           n: "06",
-          ico: "🤖",
+          ico: `<i data-lucide="bot"></i>`,
           bg: "rgba(0,245,255,0.07)",
           t: "NVIDIA NIM AI",
           d: "llama-3.1-nemotron-ultra-253b generates a plain-English executive summary of your audit.",
@@ -1963,5 +1975,6 @@
     </script>
     <script type="module" src="floating-bg.js"></script>
     <script src="back-to-top.js"></script>
+    <script>lucide.createIcons();</script>
   </body>
 </html>
