@@ -58,7 +58,7 @@ class Settings(BaseSettings):
     # ── Database & Auth ──────────────────────────────────────────────────────
     DATABASE_URL: str = "sqlite:///./biaslens.db"
     DATABASE_PATH: str = "users.db"
-    SECRET_KEY: str = "bl_s3cr3t_k3y_310807_xA9qZ2mPv8wL5nR7"  # Used for JWT
+    SECRET_KEY: str = ""  # Set via environment in production; keep empty in repo
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 # 24 hours
 
