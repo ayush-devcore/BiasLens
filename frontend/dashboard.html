@@ -289,7 +289,120 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
           <div class="cc"><div class="cc-ttl">Metric Breakdown</div><div class="cc-sub">doughnut · pass / warning / critical</div><div class="cw"><canvas id="donutChart"></canvas></div></div>
         </div>
         <div class="kpi-row" id="kpiRow"></div>
+        <!-- EXPLAINABILITY INSIGHTS -->
+<div class="cc" style="margin-top:16px;">
+  <div class="cc-ttl">Explainability Insights</div>
+  <div class="cc-sub">
+    Multi-dimensional fairness interpretation and AI transparency analysis
+  </div>
+
+  <div class="kpi-row" style="margin-top:16px;">
+
+    <div class="kc">
+      <div class="kc-lbl">BIAS_CONFIDENCE</div>
+      <div class="kc-n" id="biasConfidence" style="color:var(--c1);">
+        92%
       </div>
+      <div class="kc-sub">
+        confidence in detected fairness anomalies
+      </div>
+    </div>
+
+    <div class="kc">
+      <div class="kc-lbl">RISK_LEVEL</div>
+      <div class="kc-n" id="riskLevel" style="color:#ff0080;">
+        HIGH
+      </div>
+      <div class="kc-sub">
+        ethical risk severity assessment
+      </div>
+    </div>
+
+    <div class="kc">
+      <div class="kc-lbl">MOST_AFFECTED_GROUP</div>
+      <div class="kc-n" id="affectedGroup" style="color:#fbbf24;">
+        Female
+      </div>
+      <div class="kc-sub">
+        highest disparity detected
+      </div>
+    </div>
+
+    <div class="kc">
+      <div class="kc-lbl">FAIRNESS_STABILITY</div>
+      <div class="kc-n" id="fairnessStability" style="color:var(--c4);">
+        81%
+      </div>
+      <div class="kc-sub">
+        model consistency across groups
+      </div>
+    </div>
+
+  </div>
+     <div class="kc">
+     <div class="kc-lbl">MODEL_TRANSPARENCY</div>
+     <div class="kc-n" style="color:var(--c2);">
+       88%
+    </div>
+    <div class="kc-sub">
+      explainability and interpretability score
+    </div>
+  </div>
+
+  <!-- FEATURE INFLUENCE -->
+  <div style="margin-top:24px;">
+
+    <div class="cc-ttl">Feature Influence Analysis</div>
+    <div class="cc-sub">
+      interactive fairness influence visualization
+    </div>
+
+    <div style="margin-top:14px;display:flex;flex-direction:column;gap:12px;">
+
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px;">
+          <span>Gender</span>
+          <span>78%</span>
+        </div>
+        <div class="mb">
+          <div class="mf" style="width:78%;background:#ff0080;"></div>
+        </div>
+      </div>
+
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px;">
+          <span>Age</span>
+          <span>61%</span>
+        </div>
+        <div class="mb">
+          <div class="mf" style="width:61%;background:#fbbf24;"></div>
+        </div>
+      </div>
+
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px;">
+          <span>Income</span>
+          <span>49%</span>
+        </div>
+        <div class="mb">
+          <div class="mf" style="width:49%;background:var(--c1);"></div>
+        </div>
+      </div>
+
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px;">
+          <span>Education</span>
+          <span>34%</span>
+        </div>
+        <div class="mb">
+          <div class="mf" style="width:34%;background:var(--c4);"></div>
+          </div>
+        </div>
+
+         </div>
+       </div>
+      </div>
+    </div>
 
       <!-- DISPARITIES -->
       <div class="panel" id="p-disparities">
