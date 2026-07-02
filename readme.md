@@ -48,7 +48,14 @@ BiasLens saves **0 bytes** of user data. Files are streamed as multipart forms, 
 
 ---
 
-## 🤖 NVIDIA NIM Integration
+## 🚀 Quick Start (Local Development)
+
+To run BiasLens locally, you will need terminal windows for both the frontend and the backend.
+
+### 1. Clone the Repository
+```bash
+git clone [https://github.com/your-username/BiasLens.git](https://github.com/your-username/BiasLens.git)
+cd BiasLens
 We integrated the **Llama-3.1-Nemotron-70B-Instruct** model via **NVIDIA NIM**. While the math engine provides raw scores, the AI provides the "Human Context"—generating a plain-English executive summary explaining the findings and offering mitigation strategies.
 
 ---
